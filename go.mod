@@ -1,3 +1,3 @@
-module github.com/sheetrocks/sheetrocks/srk
+module github.com/sheetrocks/srk
 
 go 1.15
