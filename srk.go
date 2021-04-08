@@ -7,15 +7,19 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"path"
+	"strings"
 )
 
 type FormulaBody struct {
+	Name       string
+	Help       string
 	ScriptText string
 }
 
 func main() {
 	command := os.Args[1]
-	filename := os.Args[2]
+	filepath := os.Args[2]
 	token := os.Getenv("SRK_TOKEN")
 	baseUrl := os.Getenv("SRK_BASE_URL")
 
@@ -32,14 +36,32 @@ func main() {
 		return
 	}
 
-	dat, err := ioutil.ReadFile(filename)
+	dat, err := ioutil.ReadFile(filepath)
 
 	if err != nil {
+		fmt.Println("Error: Formula file was not found.")
 		fmt.Println(err)
 		return
 	}
 
-	formulaBody := FormulaBody{string(dat)}
+	scriptText := string(dat)
+
+	dir, filename := path.Split(filepath)
+
+	formulaName := strings.Split(filename, ".")[0]
+	markdownPath := path.Join(dir, fmt.Sprintf("%s.md", formulaName))
+
+	dat, err = ioutil.ReadFile(markdownPath)
+
+	if err != nil {
+		fmt.Println("Error: Help document is required.")
+		fmt.Println(err)
+		return
+	}
+
+	help := string(dat)
+
+	formulaBody := FormulaBody{Name: strings.ToUpper(formulaName), Help: help, ScriptText: scriptText}
 
 	body, _ := json.Marshal(formulaBody)
 
