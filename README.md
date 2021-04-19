@@ -9,4 +9,6 @@
 4. The solution will consist of yearfrac.go file and a yearfrac.md file.
 5. Once complete, zip up the repo and email it to me.
 
-Note - [This link](https://en.wikipedia.org/wiki/360-day_calendar) might also be helpful.
+### Other notes 
+- [This link](https://en.wikipedia.org/wiki/360-day_calendar) might also be helpful.
+- Follow the convention in echo.go, specifically the input should be a slice of ([]values.Value) and the output should be a value.Value
