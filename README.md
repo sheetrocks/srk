@@ -1,40 +1,115 @@
 # srk - the SheetRocks Command Line Interface
 
+---
 
-## Homework
+## How to make and push your own function to SheetRocks
 
-1. Clone this repo to your local machine. Get golang setup (VS Code recommended)
-2. Create a new formula, YEARFRAC, following the conventions of the echo.go / echo.md file in this repo.
-3. The YEARFRAC formula should be based on [this google sheet spec](https://support.google.com/docs/answer/3092989?hl=en)
-4. The solution will consist of yearfrac.go file and a yearfrac.md file.
-5. Once complete, zip up the repo and email it to me.
+This tutorial will walk you through how to create a custom function and upload it to SheetRocks.
+Hopefully you have at least a basic understanding of programming, but I will try to make this
+as accessible as possible to any skill level.
 
-### Other notes 
-- [This link](https://en.wikipedia.org/wiki/360-day_calendar) might also be helpful.
-- Follow the convention in echo.go, specifically the input should be a slice of ([]values.Value) and the output should be a value.Value
+## Download the repository
 
+If you are familiar with git, clone this repository. If not, download the zip.
 
-## Using srk - testers only
-First, you'll need to log in and create an API key (you do this by creating a workbook, clicking profile, and clicking create API key).
+To download the zip, click the green button labeled "Code" and click "Download Zip."
+Extract the downloaded zip file to a destination of your choice on your computer.
 
-Copy the key to your clipboard. On a Mac, you can run
+## Open the repository
 
+Open the repository folder in your text editor of choice. If you do not have one,
+[Visual Studio Code](https://code.visualstudio.com/) is widely used and recommended.
+
+To open the folder in vscode, click ```File > Open Folder...``` and navigate to the location
+where you chose to clone the repository or unzip the file.
+
+## Create your function
+
+For the purposes of this tutorial, there is a completed example in the ```formulas``` folder
+called ```sum.go```. 
+
+Every formula accepts in input of ```[]values.Value``` which represents a list of arguments
+that the formula needs. Each ```values.Value``` passed to the function can have a type of
+```EMPTY```, ```NUMBER```, ```DATE```, ```BOOLEAN```, ```TEXT```, or ```ARRAY```.
+
+For our example SUM function, we will need an ```ARRAY``` representing multiple values that
+we can return the sum of. This function would only have one argument passed, but other functions may need
+more than one argument. Whether or not the function has multiple arguments, the input is always
+an array of values.
+
+For example, if we have 3 numbers in cell A1, A2, and A3, we input them into the formula as ```SUM(A1:A3)```
+rather than ```SUM(A1, A2, A3)```.
+
+For our function, the user will input a list of cells they want to get the sum of, similar to the
+example above. They will not type in the cell of each individual number, rather they will use ```SUM(START:FINISH)```
+which will pass a ```values.Value``` of type ```ARRAY``` inside of a ```[]values.Value``` where it is the
+only item because the function only accepts one argument.
+
+Follow along the ```formulas/sum.go``` file to see how the formula is created. There are comments in the file that 
+will guide you through the steps that were taken to create the formula and the thought process behind it. The purpose
+of the function is to help you understand the inputs and outputs and how they relate to SheetRocks.
+
+To create your formula, you can use the template ```myformula.go``` file. Rename the file by replacing ```myformula``` 
+with the actual name of your function in all lowercase. This file includes 
+the package and import declarations at the top, which are required. In the file, there is a placeholder function
+called ```Myfunction```. Change the name of this to the name of your function, with the first letter being capital
+and the rest lowercase.
+
+## Create your .md file
+
+For every function that is to be uploaded, there needs to be an additional file titled ```yourfunction.md``` which
+gives information about the function and the arguments it accepts. This file needs to be in the same folder as your ```myfunction.go``` 
+file. This information is what pops up when you start 
+typing a function in the spreadsheet. Open the ```sum.md``` file and you can see the example for the SUM function.
+There is a template file you can use for your function called ```myformula.md``` where you can replace the file name, function name,
+arguments, and description with what is appropriate for your function. Make sure the function name inside of the file is in all caps.
+
+## Push the function to Sheetrocks
+
+At this point, you should have two files. For example, if the name of your function was ```Average```, you should have a
+```average.go``` with a function ```func Average(v []values.Value) values.Value``` and an ```average.md``` markdown file.
+
+You'll need to log in and create an API key (open SheetRocks, log in, create a workbook, click profile, and click create API key).
+Copy the key to your clipboard.
+
+You then need to push the formula using the terminal/command prompt.
+
+First, navigate to the directory where you originally cloned the repository or unzipped the file you downloaded.
+
+On windows:
 ```
-$ SRK_TOKEN={your_api_token} ./srk push echo.go
+C:\>cd C:\path\to\srk
+```
+
+On Linux:
+```
+$ cd /path/to/srk
+```
+
+Next, you need to set your API key.
+
+On windows:
+```
+C:\path\to\srk>setx SRK_TOKEN "your_api_key_here"
+```
+
+On Linux:
+```
+$ export SRK_TOKEN="your_api_key_here"
+```
+
+Then, push the formula to SheetRocks.
+
+Windows:
+```
+C:\path\to\srk>./srk.exe push ./formulas/yourformulaname.go
+```
+
+Linux:
+```
+$ ./srk push ./formulas/yourformulaname.go
 ```
 
 If successful, it will display a success message. If not, it will display an error.
 
-Using windows, run
-```
-C:\path\to\srk>setx SRK_TOKEN "your_api_token"
-C:\path\to\srk>./srk.exe push echo.go 
-```
 
-## Creating your custom formula
-- In order to work, your custom formula should keep the same func signature as the echo.go example, namely it should accept a values slice ([]values.Value) and return a values.Value.
-- There is a little magic that happens with the name. In order to work, please name the method signature, filename, and help file the same thing (with func capitalized). For example to create a Multiply function:
-    * Name of file is multiply.go
-    * Name of help file is multiply.md
-    * Function signature is `func Multiply(v []values.Value) values.Value { ... }`
-- The help file will display in autocomplete. Please follow the convention of echo.md, with the first line containing the syntax of the formula, followed by a brief summmary of functionality in the next paragraph, and any additional information afterwards.
