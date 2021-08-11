@@ -7,16 +7,17 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"path"
 	"strings"
 
 	v "github.com/sheetrocks/srk/values"
 )
 
 type FormulaBody struct {
-	Name       string
-	Help       string
-	ScriptText string
+	Name         string
+	Runtime      string
+	Help         string
+	ScriptText   string
+	Dependencies string
 }
 
 type Asset struct {
@@ -69,6 +70,14 @@ type ChartType struct {
 	Title string
 }
 
+type Config struct {
+	Name         string
+	Runtime      string
+	Formula      string
+	Help         string
+	Dependencies string
+}
+
 func main() {
 	command := os.Args[1]
 	filepath := os.Args[2]
@@ -88,7 +97,7 @@ func main() {
 		return
 	}
 
-	info, err := os.Stat(filepath)
+	_, err := os.Stat(filepath)
 
 	if err != nil {
 		fmt.Println("Error: file path was not recognized. Please check the file path.")
@@ -96,113 +105,141 @@ func main() {
 		return
 	}
 
-	if info.IsDir() {
-		files, _ := ioutil.ReadDir(filepath)
+	dat, err := ioutil.ReadFile(filepath)
 
-		chartSubmission := ChartTypeSubmission{}
-		chartSubmission.Assets = []Asset{}
-		hasIndex := false
-		hasHelp := false
-		hasConfig := false
+	config := Config{}
+	err = json.Unmarshal(dat, &config)
 
-		_, f := path.Split(filepath)
-		chartSubmission.Title = f
-		for _, file := range files {
-			if file.Name() == "index.html" {
-				hasIndex = true
-			}
-			switch file.Name() {
-			case "parameters.json":
-				parameterPath := path.Join(filepath, file.Name())
-				dat, err := ioutil.ReadFile(parameterPath)
-				var parametersConfig ParametersConfig
-				err = json.Unmarshal(dat, &parametersConfig)
+	if err != nil {
+		fmt.Println("Error: could not parse configuration file.")
+		fmt.Println(err)
+	}
 
-				if err != nil {
-					fmt.Println("Error encountered while trying to read parameters.json file")
-					fmt.Println(err)
-					return
+	if config.Name == "" {
+		fmt.Println("Error: config file must have name field.")
+	}
+
+	if config.Runtime != "python" {
+		fmt.Println(`Error: invalid runtime field specified. Accepted runtimes: "python"`)
+	}
+
+	scriptText, err := ioutil.ReadFile(config.Formula)
+
+	if err != nil {
+		fmt.Printf("Error: could not find formula script located at %s", config.Formula)
+	}
+
+	helpText, err := ioutil.ReadFile(config.Help)
+
+	if err != nil {
+		fmt.Printf("Error: could not find help file located at %s", config.Help)
+	}
+
+	dependenciesText, err := ioutil.ReadFile(config.Dependencies)
+
+	if err != nil {
+		fmt.Printf("Error: could not find dependencies file located at %s", config.Dependencies)
+	}
+
+	formulaBody := FormulaBody{Name: strings.ToUpper(config.Name), Runtime: config.Runtime, Help: string(helpText), ScriptText: string(scriptText), Dependencies: string(dependenciesText)}
+
+	body, _ := json.Marshal(formulaBody)
+
+	r := bytes.NewReader(body)
+
+	req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("%s/formula", baseUrl), r)
+
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+	req.Header.Add("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+
+	if resp.StatusCode == 200 {
+		fmt.Printf("🎉 Success! You have pushed your formula \"%s\" to SheetRocks 🎉\n", formulaBody.Name)
+	} else {
+		bytes, _ := ioutil.ReadAll(resp.Body)
+		fmt.Println("SheetRocks error: ", string(bytes))
+	}
+	/*
+		if info.IsDir() {
+			files, _ := ioutil.ReadDir(filepath)
+
+			chartSubmission := ChartTypeSubmission{}
+			chartSubmission.Assets = []Asset{}
+			hasIndex := false
+			hasHelp := false
+			hasConfig := false
+
+			_, f := path.Split(filepath)
+			chartSubmission.Title = f
+			for _, file := range files {
+				if file.Name() == "index.html" {
+					hasIndex = true
 				}
-				chartSubmission.Parameters = parametersConfig.Parameters
-				hasConfig = true
-				break
-			case "help.md":
-				dat, _ := ioutil.ReadFile(path.Join(filepath, file.Name()))
-				chartSubmission.Help = string(dat)
-				hasHelp = true
-				break
-			default:
-				dat, _ := ioutil.ReadFile(path.Join(filepath, file.Name()))
-				mimeType := ""
+				switch file.Name() {
+				case "parameters.json":
+					parameterPath := path.Join(filepath, file.Name())
+					dat, err := ioutil.ReadFile(parameterPath)
+					var parametersConfig ParametersConfig
+					err = json.Unmarshal(dat, &parametersConfig)
 
-				switch path.Ext(file.Name()) {
-				case ".html":
-					mimeType = "text/html"
+					if err != nil {
+						fmt.Println("Error encountered while trying to read parameters.json file")
+						fmt.Println(err)
+						return
+					}
+					chartSubmission.Parameters = parametersConfig.Parameters
+					hasConfig = true
 					break
-				case ".js":
-					mimeType = "application/javascript"
+				case "help.md":
+					dat, _ := ioutil.ReadFile(path.Join(filepath, file.Name()))
+					chartSubmission.Help = string(dat)
+					hasHelp = true
 					break
-				case ".css":
-					mimeType = "text/plain"
-					break
-				}
+				default:
+					dat, _ := ioutil.ReadFile(path.Join(filepath, file.Name()))
+					mimeType := ""
 
-				if mimeType != "" {
-					chartSubmission.Assets = append(chartSubmission.Assets, Asset{file.Name(), mimeType, string(dat)})
-				}
+					switch path.Ext(file.Name()) {
+					case ".html":
+						mimeType = "text/html"
+						break
+					case ".js":
+						mimeType = "application/javascript"
+						break
+					case ".css":
+						mimeType = "text/plain"
+						break
+					}
 
-			}
-		}
+					if mimeType != "" {
+						chartSubmission.Assets = append(chartSubmission.Assets, Asset{file.Name(), mimeType, string(dat)})
+					}
 
-		if !hasIndex {
-			fmt.Println("Missing required file: index.html")
-			return
-		}
-
-		if !hasConfig {
-			fmt.Println("Missing required file: parameters.json")
-			return
-		}
-
-		if !hasHelp {
-			fmt.Println("Missing required file: help.md")
-			return
-		}
-
-		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/chart-type", baseUrl), nil)
-
-		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
-		req.Header.Add("Content-Type", "application/json")
-
-		client := &http.Client{}
-		resp, err := client.Do(req)
-		if err != nil {
-			panic(err)
-		}
-
-		if resp.StatusCode == 200 {
-			chartTypes := []ChartType{}
-			json.NewDecoder(resp.Body).Decode(&chartTypes)
-			resp.Body.Close()
-
-			body, _ := json.Marshal(chartSubmission)
-			r := bytes.NewReader(body)
-			foundChartID := ""
-
-			for _, ct := range chartTypes {
-				if ct.Title == chartSubmission.Title {
-					foundChartID = ct.ID
 				}
 			}
 
-			var outputType string
-			if foundChartID == "" {
-				outputType = "added"
-				req, err = http.NewRequest(http.MethodPost, fmt.Sprintf("%s/chart-type", baseUrl), r)
-			} else {
-				outputType = "updated"
-				req, err = http.NewRequest(http.MethodPut, fmt.Sprintf("%s/chart-type/%s", baseUrl, foundChartID), r)
+			if !hasIndex {
+				fmt.Println("Missing required file: index.html")
+				return
 			}
+
+			if !hasConfig {
+				fmt.Println("Missing required file: parameters.json")
+				return
+			}
+
+			if !hasHelp {
+				fmt.Println("Missing required file: help.md")
+				return
+			}
+
+
+			req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/chart-type", baseUrl), nil)
 
 			req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 			req.Header.Add("Content-Type", "application/json")
@@ -214,59 +251,93 @@ func main() {
 			}
 
 			if resp.StatusCode == 200 {
-				fmt.Printf("🎉 Successfully %s new chart \"%s\" 🎉\n", outputType, chartSubmission.Title)
+				chartTypes := []ChartType{}
+				json.NewDecoder(resp.Body).Decode(&chartTypes)
+				resp.Body.Close()
+
+				body, _ := json.Marshal(chartSubmission)
+				r := bytes.NewReader(body)
+				foundChartID := ""
+
+				for _, ct := range chartTypes {
+					if ct.Title == chartSubmission.Title {
+						foundChartID = ct.ID
+					}
+				}
+
+				var outputType string
+				if foundChartID == "" {
+					outputType = "added"
+					req, err = http.NewRequest(http.MethodPost, fmt.Sprintf("%s/chart-type", baseUrl), r)
+				} else {
+					outputType = "updated"
+					req, err = http.NewRequest(http.MethodPut, fmt.Sprintf("%s/chart-type/%s", baseUrl, foundChartID), r)
+				}
+
+				req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+				req.Header.Add("Content-Type", "application/json")
+
+				client := &http.Client{}
+				resp, err := client.Do(req)
+				if err != nil {
+					panic(err)
+				}
+
+				if resp.StatusCode == 200 {
+					fmt.Printf("🎉 Successfully %s new chart \"%s\" 🎉\n", outputType, chartSubmission.Title)
+				} else {
+					fmt.Printf("Encountered unexpected status code: %d\n", resp.StatusCode)
+				}
+			}
+		} else {
+			dat, err := ioutil.ReadFile(filepath)
+
+			if err != nil {
+				fmt.Println("Error: Formula file was not found.")
+				fmt.Println(err)
+				return
+			}
+
+			scriptText := string(dat)
+
+			dir, filename := path.Split(filepath)
+
+			formulaName := strings.Split(filename, ".")[0]
+			markdownPath := path.Join(dir, fmt.Sprintf("%s.md", formulaName))
+
+			dat, err = ioutil.ReadFile(markdownPath)
+
+			if err != nil {
+				fmt.Println("Error: Help document is required.")
+				fmt.Println(err)
+				return
+			}
+
+			help := string(dat)
+
+			formulaBody := FormulaBody{Name: strings.ToUpper(formulaName), Help: help, ScriptText: scriptText}
+
+			body, _ := json.Marshal(formulaBody)
+
+			r := bytes.NewReader(body)
+
+			req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("%s/formula", baseUrl), r)
+
+			req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+			req.Header.Add("Content-Type", "application/json")
+
+			client := &http.Client{}
+			resp, err := client.Do(req)
+			if err != nil {
+				panic(err)
+			}
+
+			if resp.StatusCode == 200 {
+				fmt.Printf("🎉 Success! You have pushed your formula \"%s\" to SheetRocks 🎉\n", formulaBody.Name)
 			} else {
-				fmt.Printf("Encountered unexpected status code: %d\n", resp.StatusCode)
+				bytes, _ := ioutil.ReadAll(resp.Body)
+				fmt.Println("SheetRocks error: ", string(bytes))
 			}
 		}
-	} else {
-		dat, err := ioutil.ReadFile(filepath)
-
-		if err != nil {
-			fmt.Println("Error: Formula file was not found.")
-			fmt.Println(err)
-			return
-		}
-
-		scriptText := string(dat)
-
-		dir, filename := path.Split(filepath)
-
-		formulaName := strings.Split(filename, ".")[0]
-		markdownPath := path.Join(dir, fmt.Sprintf("%s.md", formulaName))
-
-		dat, err = ioutil.ReadFile(markdownPath)
-
-		if err != nil {
-			fmt.Println("Error: Help document is required.")
-			fmt.Println(err)
-			return
-		}
-
-		help := string(dat)
-
-		formulaBody := FormulaBody{Name: strings.ToUpper(formulaName), Help: help, ScriptText: scriptText}
-
-		body, _ := json.Marshal(formulaBody)
-
-		r := bytes.NewReader(body)
-
-		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("%s/formula", baseUrl), r)
-
-		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
-		req.Header.Add("Content-Type", "application/json")
-
-		client := &http.Client{}
-		resp, err := client.Do(req)
-		if err != nil {
-			panic(err)
-		}
-
-		if resp.StatusCode == 200 {
-			fmt.Printf("🎉 Success! You have pushed your formula \"%s\" to SheetRocks 🎉\n", formulaBody.Name)
-		} else {
-			bytes, _ := ioutil.ReadAll(resp.Body)
-			fmt.Println("SheetRocks error: ", string(bytes))
-		}
-	}
+	*/
 }
