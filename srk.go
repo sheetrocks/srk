@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"path"
 	"strings"
 
 	v "github.com/sheetrocks/srk/values"
@@ -100,7 +101,7 @@ func main() {
 	_, err := os.Stat(filepath)
 
 	if err != nil {
-		fmt.Println("Error: file path was not recognized. Please check the file path.")
+		fmt.Println("Error: configuration file path was not recognized. Please check the file path.")
 		fmt.Println(err)
 		return
 	}
@@ -126,21 +127,23 @@ func main() {
 		return
 	}
 
-	scriptText, err := ioutil.ReadFile(config.Formula)
+	dir := path.Dir(filepath)
+
+	scriptText, err := ioutil.ReadFile(path.Join(dir, config.Formula))
 
 	if err != nil {
 		fmt.Printf("Error: could not find formula script located at %s\n", config.Formula)
 		return
 	}
 
-	helpText, err := ioutil.ReadFile(config.Help)
+	helpText, err := ioutil.ReadFile(path.Join(dir, config.Help))
 
 	if err != nil {
 		fmt.Printf("Error: could not find help file located at %s\n", config.Help)
 		return
 	}
 
-	dependenciesText, err := ioutil.ReadFile(config.Dependencies)
+	dependenciesText, err := ioutil.ReadFile(path.Join(dir, config.Dependencies))
 
 	if err != nil {
 		fmt.Printf("Error: could not find dependencies file located at %s\n", config.Dependencies)

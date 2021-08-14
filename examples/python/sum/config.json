@@ -2,7 +2,7 @@
     "version": "1.0",
     "runtime": "python",
     "name": "customsum",
-    "formula": "sum.py",
-    "help": "sum.md",
+    "formula": "customsum.py",
+    "help": "customsum.md",
     "dependencies": "requirements.txt"
 }
