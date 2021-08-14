@@ -1,9 +1,0 @@
-{
-    "version": "1.0",
-    "parameters": [
-        {
-            "Type": "number",
-            "Title": "Enter a number"
-        }
-    ]
-}

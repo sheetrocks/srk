@@ -113,32 +113,38 @@ func main() {
 	if err != nil {
 		fmt.Println("Error: could not parse configuration file.")
 		fmt.Println(err)
+		return
 	}
 
 	if config.Name == "" {
 		fmt.Println("Error: config file must have name field.")
+		return
 	}
 
 	if config.Runtime != "python" {
 		fmt.Println(`Error: invalid runtime field specified. Accepted runtimes: "python"`)
+		return
 	}
 
 	scriptText, err := ioutil.ReadFile(config.Formula)
 
 	if err != nil {
-		fmt.Printf("Error: could not find formula script located at %s", config.Formula)
+		fmt.Printf("Error: could not find formula script located at %s\n", config.Formula)
+		return
 	}
 
 	helpText, err := ioutil.ReadFile(config.Help)
 
 	if err != nil {
-		fmt.Printf("Error: could not find help file located at %s", config.Help)
+		fmt.Printf("Error: could not find help file located at %s\n", config.Help)
+		return
 	}
 
 	dependenciesText, err := ioutil.ReadFile(config.Dependencies)
 
 	if err != nil {
-		fmt.Printf("Error: could not find dependencies file located at %s", config.Dependencies)
+		fmt.Printf("Error: could not find dependencies file located at %s\n", config.Dependencies)
+		return
 	}
 
 	formulaBody := FormulaBody{Name: strings.ToUpper(config.Name), Runtime: config.Runtime, Help: string(helpText), ScriptText: string(scriptText), Dependencies: string(dependenciesText)}

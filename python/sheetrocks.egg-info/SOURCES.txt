@@ -1,9 +1,0 @@
-README.md
-setup.cfg
-setup.py
-sheetrocks/__init__.py
-sheetrocks/value.py
-sheetrocks.egg-info/PKG-INFO
-sheetrocks.egg-info/SOURCES.txt
-sheetrocks.egg-info/dependency_links.txt
-sheetrocks.egg-info/top_level.txt
