@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"path"
@@ -105,20 +106,17 @@ func main() {
 	}
 
 	if token == "" {
-		fmt.Println("You must provide your API token in the SRK_TOKEN environment variable.")
-		return
+		log.Fatal("You must provide your API token in the SRK_TOKEN environment variable.")
 	}
 
 	if command != "push" {
-		fmt.Println("Command not found. Supported commands: push")
-		return
+		log.Fatal("Command not found. Supported commands: push")
 	}
 
 	_, err := os.Stat(filepath)
 
 	if err != nil {
-		fmt.Println("Error: configuration file path was not recognized. Please check the file path.")
-		fmt.Println(err)
+		log.Fatal("Error: configuration file path was not recognized. Please check the file path.\n\n", err)
 		return
 	}
 
@@ -130,11 +128,9 @@ func main() {
 	err = json.Unmarshal(dat, &runtime)
 
 	if runtime.Runtime == "" {
-		fmt.Println("Error: must specify runtime.")
-		return
+		log.Fatal("Error: must specify runtime.")
 	} else if !(runtime.Runtime == "python" || runtime.Runtime == "web") {
-		fmt.Println(`Error: invalid runtime. Accepted runtimes: "python", "web"`)
-		return
+		log.Fatal(`Error: invalid runtime. Accepted runtimes: "python", "web"`)
 	}
 
 	if runtime.Runtime == "python" {
@@ -142,40 +138,33 @@ func main() {
 		err = json.Unmarshal(dat, &config)
 
 		if err != nil {
-			fmt.Println("Error: could not parse configuration file.")
-			fmt.Println(err)
-			return
+			log.Fatal("Error: could not parse configuration file.\n\n", err)
 		}
 
 		if config.Name == "" {
-			fmt.Println("Error: config file must have name field.")
-			return
+			log.Fatal("Error: config file must have name field.")
 		}
 
 		if config.Runtime != "python" {
-			fmt.Println(`Error: invalid runtime field specified. Accepted runtimes: "python"`)
-			return
+			log.Fatal(`Error: invalid runtime field specified. Accepted runtimes: "python"`)
 		}
 
 		scriptText, err := ioutil.ReadFile(path.Join(dir, config.Formula))
 
 		if err != nil {
-			fmt.Printf("Error: could not find formula script located at %s\n", config.Formula)
-			return
+			log.Fatal("Error: could not find formula script located at %s\n", config.Formula)
 		}
 
 		helpText, err := ioutil.ReadFile(path.Join(dir, config.Help))
 
 		if err != nil {
-			fmt.Printf("Error: could not find help file located at %s\n", config.Help)
-			return
+			log.Fatal("Error: could not find help file located at %s\n", config.Help)
 		}
 
 		dependenciesText, err := ioutil.ReadFile(path.Join(dir, config.Dependencies))
 
 		if err != nil {
-			fmt.Printf("Error: could not find dependencies file located at %s\n", config.Dependencies)
-			return
+			log.Fatal("Error: could not find dependencies file located at %s\n", config.Dependencies)
 		}
 
 		s := spinner.New(spinner.CharSets[36], 100*time.Millisecond)
@@ -197,7 +186,7 @@ func main() {
 		client := &http.Client{}
 		resp, err := client.Do(req)
 		if err != nil {
-			panic(err)
+			log.Fatal("Unhandled error submitting to SheetRocks: ", err)
 		}
 
 		s.Stop()
@@ -214,23 +203,32 @@ func main() {
 		err = json.Unmarshal(dat, &webConfig)
 
 		if err != nil {
-			fmt.Println("Error: could not read configuration file for chart.")
-			return
+			log.Fatal("Error: could not read configuration file for chart.")
 		}
 
 		if webConfig.Name == "" {
-			fmt.Println(`Error: configuration file must have a "name" field which specifies the name of the chart.`)
+			log.Fatal(`Error: configuration file must have a "name" field which specifies the name of the chart.`)
 		}
 
 		if webConfig.Help == "" {
-			fmt.Println("Error: must specify path of help file.")
-			return
+			log.Fatal("Error: must specify path of help file.")
 		}
 
 		helpText, err := ioutil.ReadFile(path.Join(dir, webConfig.Help))
 
 		if err != nil {
-			fmt.Println("Error: could not read help file: ", err)
+			log.Fatal("Error: could not read help file: ", err)
+		}
+
+		hasIndex := false
+		for _, filename := range webConfig.Assets {
+			if filename == "index.html" {
+				hasIndex = true
+			}
+		}
+
+		if !hasIndex {
+			log.Fatal(`Error: there must be an "index.html" file listed in assets.`)
 		}
 
 		assets := []Asset{}
@@ -239,14 +237,12 @@ func main() {
 			assetDir := path.Dir(assetPath)
 
 			if assetDir != "." {
-				fmt.Println("Error: assets must be in same directory as config file. Asset not in config directory: ", assetPath)
-				return
+				log.Fatal("Error: assets must be in same directory as config file. Asset not in config directory: ", assetPath)
 			}
 			dat, err := ioutil.ReadFile(path.Join(dir, assetPath))
 
 			if err != nil {
-				fmt.Println("Error: could not read asset located at ", assetPath)
-				return
+				log.Fatal("Error: could not read asset located at ", assetPath)
 			}
 			mimeType := ""
 
@@ -276,7 +272,7 @@ func main() {
 		client := &http.Client{}
 		resp, err := client.Do(req)
 		if err != nil {
-			panic(err)
+			log.Fatal("Unhandled error encountered while submitting to SheetRocks: ", err)
 		}
 
 		if resp.StatusCode == 200 {
@@ -309,7 +305,7 @@ func main() {
 			client := &http.Client{}
 			resp, err := client.Do(req)
 			if err != nil {
-				panic(err)
+				log.Fatal("Unhandled error encountered while submitting to SheetRocks: ", err)
 			}
 
 			if resp.StatusCode == 200 {

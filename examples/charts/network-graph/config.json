@@ -1,0 +1,17 @@
+{
+  "version": "1.0",
+  "name": "Network Graph",
+  "runtime": "web",
+  "help": "help.md",
+  "assets": ["index.html", "graph.css", "graph.js"],
+  "parameters": [
+      {
+          "Type": "text",
+          "Title": "Enter a range representing nodes of the graph"
+      },
+      {
+          "Type": "text",
+          "Title": "Enter a range representing edges of the graph"
+      }
+  ]
+}
