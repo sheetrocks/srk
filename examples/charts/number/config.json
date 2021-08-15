@@ -1,5 +1,10 @@
 {
     "version": "1.0",
+    "name": "Number",
+    "runtime": "web",
+    "help": "help.md",
+    "index": "index.html",
+    "assets": [],
     "parameters": [
         {
             "Type": "number",

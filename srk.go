@@ -82,6 +82,18 @@ type Config struct {
 	Dependencies string
 }
 
+type Runtime struct {
+	Runtime string
+}
+
+type WebConfig struct {
+	Name       string
+	Runtime    string
+	Help       string
+	Parameters []Parameter
+	Assets     []string
+}
+
 func main() {
 	command := os.Args[1]
 	filepath := os.Args[2]
@@ -94,6 +106,7 @@ func main() {
 
 	if token == "" {
 		fmt.Println("You must provide your API token in the SRK_TOKEN environment variable.")
+		return
 	}
 
 	if command != "push" {
@@ -109,77 +122,201 @@ func main() {
 		return
 	}
 
-	dat, err := ioutil.ReadFile(filepath)
-
-	config := Config{}
-	err = json.Unmarshal(dat, &config)
-
-	if err != nil {
-		fmt.Println("Error: could not parse configuration file.")
-		fmt.Println(err)
-		return
-	}
-
-	if config.Name == "" {
-		fmt.Println("Error: config file must have name field.")
-		return
-	}
-
-	if config.Runtime != "python" {
-		fmt.Println(`Error: invalid runtime field specified. Accepted runtimes: "python"`)
-		return
-	}
-
 	dir := path.Dir(filepath)
 
-	scriptText, err := ioutil.ReadFile(path.Join(dir, config.Formula))
+	dat, err := ioutil.ReadFile(filepath)
 
-	if err != nil {
-		fmt.Printf("Error: could not find formula script located at %s\n", config.Formula)
+	runtime := Runtime{}
+	err = json.Unmarshal(dat, &runtime)
+
+	if runtime.Runtime == "" {
+		fmt.Println("Error: must specify runtime.")
+		return
+	} else if !(runtime.Runtime == "python" || runtime.Runtime == "web") {
+		fmt.Println(`Error: invalid runtime. Accepted runtimes: "python", "web"`)
 		return
 	}
 
-	helpText, err := ioutil.ReadFile(path.Join(dir, config.Help))
+	if runtime.Runtime == "python" {
+		config := Config{}
+		err = json.Unmarshal(dat, &config)
 
-	if err != nil {
-		fmt.Printf("Error: could not find help file located at %s\n", config.Help)
-		return
+		if err != nil {
+			fmt.Println("Error: could not parse configuration file.")
+			fmt.Println(err)
+			return
+		}
+
+		if config.Name == "" {
+			fmt.Println("Error: config file must have name field.")
+			return
+		}
+
+		if config.Runtime != "python" {
+			fmt.Println(`Error: invalid runtime field specified. Accepted runtimes: "python"`)
+			return
+		}
+
+		scriptText, err := ioutil.ReadFile(path.Join(dir, config.Formula))
+
+		if err != nil {
+			fmt.Printf("Error: could not find formula script located at %s\n", config.Formula)
+			return
+		}
+
+		helpText, err := ioutil.ReadFile(path.Join(dir, config.Help))
+
+		if err != nil {
+			fmt.Printf("Error: could not find help file located at %s\n", config.Help)
+			return
+		}
+
+		dependenciesText, err := ioutil.ReadFile(path.Join(dir, config.Dependencies))
+
+		if err != nil {
+			fmt.Printf("Error: could not find dependencies file located at %s\n", config.Dependencies)
+			return
+		}
+
+		s := spinner.New(spinner.CharSets[36], 100*time.Millisecond)
+		s.Color("fgBlack")
+		s.FinalMSG = ""
+		s.Start()
+
+		formulaBody := FormulaBody{Name: strings.ToUpper(config.Name), Runtime: config.Runtime, Help: string(helpText), ScriptText: string(scriptText), Dependencies: string(dependenciesText)}
+
+		body, _ := json.Marshal(formulaBody)
+
+		r := bytes.NewReader(body)
+
+		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("%s/formula", baseUrl), r)
+
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+		req.Header.Add("Content-Type", "application/json")
+
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			panic(err)
+		}
+
+		s.Stop()
+		if resp.StatusCode == 200 {
+			fmt.Printf("🎉 Success! You have pushed your formula \"%s\" to SheetRocks 🎉\n", formulaBody.Name)
+		} else {
+			bytes, _ := ioutil.ReadAll(resp.Body)
+			fmt.Println("SheetRocks error: ", string(bytes))
+		}
 	}
 
-	dependenciesText, err := ioutil.ReadFile(path.Join(dir, config.Dependencies))
+	if runtime.Runtime == "web" {
+		webConfig := WebConfig{}
+		err = json.Unmarshal(dat, &webConfig)
 
-	if err != nil {
-		fmt.Printf("Error: could not find dependencies file located at %s\n", config.Dependencies)
-		return
-	}
+		if err != nil {
+			fmt.Println("Error: could not read configuration file for chart.")
+			return
+		}
 
-	s := spinner.New(spinner.CharSets[36], 100*time.Millisecond)
-	s.Color("fgBlack")
-	s.FinalMSG = ""
-	s.Start()
+		if webConfig.Name == "" {
+			fmt.Println(`Error: configuration file must have a "name" field which specifies the name of the chart.`)
+		}
 
-	formulaBody := FormulaBody{Name: strings.ToUpper(config.Name), Runtime: config.Runtime, Help: string(helpText), ScriptText: string(scriptText), Dependencies: string(dependenciesText)}
+		if webConfig.Help == "" {
+			fmt.Println("Error: must specify path of help file.")
+			return
+		}
 
-	body, _ := json.Marshal(formulaBody)
+		helpText, err := ioutil.ReadFile(path.Join(dir, webConfig.Help))
 
-	r := bytes.NewReader(body)
+		if err != nil {
+			fmt.Println("Error: could not read help file: ", err)
+		}
 
-	req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("%s/formula", baseUrl), r)
+		assets := []Asset{}
 
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
-	req.Header.Add("Content-Type", "application/json")
+		for _, assetPath := range webConfig.Assets {
+			assetDir := path.Dir(assetPath)
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		panic(err)
-	}
+			if assetDir != "." {
+				fmt.Println("Error: assets must be in same directory as config file. Asset not in config directory: ", assetPath)
+				return
+			}
+			dat, err := ioutil.ReadFile(path.Join(dir, assetPath))
 
-	s.Stop()
-	if resp.StatusCode == 200 {
-		fmt.Printf("🎉 Success! You have pushed your formula \"%s\" to SheetRocks 🎉\n", formulaBody.Name)
-	} else {
-		bytes, _ := ioutil.ReadAll(resp.Body)
-		fmt.Println("SheetRocks error: ", string(bytes))
+			if err != nil {
+				fmt.Println("Error: could not read asset located at ", assetPath)
+				return
+			}
+			mimeType := ""
+
+			switch path.Ext(assetPath) {
+			case ".html":
+				mimeType = "text/html"
+				break
+			case ".js":
+				mimeType = "application/javascript"
+				break
+			case ".css":
+				mimeType = "text/plain"
+				break
+			}
+
+			if mimeType != "" {
+				assets = append(assets, Asset{assetPath, mimeType, string(dat)})
+			}
+		}
+		chartSubmission := ChartTypeSubmission{Title: webConfig.Name, Help: string(helpText), Parameters: webConfig.Parameters}
+
+		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/chart-type", baseUrl), nil)
+
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+		req.Header.Add("Content-Type", "application/json")
+
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			panic(err)
+		}
+
+		if resp.StatusCode == 200 {
+			chartTypes := []ChartType{}
+			json.NewDecoder(resp.Body).Decode(&chartTypes)
+			resp.Body.Close()
+
+			body, _ := json.Marshal(chartSubmission)
+			r := bytes.NewReader(body)
+			foundChartID := ""
+
+			for _, ct := range chartTypes {
+				if ct.Title == chartSubmission.Title {
+					foundChartID = ct.ID
+				}
+			}
+
+			var outputType string
+			if foundChartID == "" {
+				outputType = "added"
+				req, err = http.NewRequest(http.MethodPost, fmt.Sprintf("%s/chart-type", baseUrl), r)
+			} else {
+				outputType = "updated"
+				req, err = http.NewRequest(http.MethodPut, fmt.Sprintf("%s/chart-type/%s", baseUrl, foundChartID), r)
+			}
+
+			req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+			req.Header.Add("Content-Type", "application/json")
+
+			client := &http.Client{}
+			resp, err := client.Do(req)
+			if err != nil {
+				panic(err)
+			}
+
+			if resp.StatusCode == 200 {
+				fmt.Printf("🎉 Successfully %s new chart \"%s\" 🎉\n", outputType, chartSubmission.Title)
+			} else {
+				fmt.Printf("Encountered unexpected status code: %d\n", resp.StatusCode)
+			}
+		}
 	}
 }
