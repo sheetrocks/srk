@@ -11,6 +11,7 @@ const (
 	BOOLEAN ValueType = 3
 	TEXT    ValueType = 4
 	ARRAY   ValueType = 5
+	ERROR   ValueType = 6
 )
 
 type Value struct {
