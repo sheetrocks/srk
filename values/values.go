@@ -18,6 +18,7 @@ const (
 )
 
 type Value struct {
+	ID      string
 	Type    ValueType
 	Number  float64
 	Text    string
