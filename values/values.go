@@ -32,7 +32,7 @@ func (v *Value) String() string {
 	case EMPTY:
 		return ""
 	case NUMBER:
-		return fmt.Sprintf("%f", v.Number)
+		return fmt.Sprintf("%g", v.Number)
 	case DATE:
 		return v.Date.Format(time.RFC3339)
 	case BOOLEAN:
