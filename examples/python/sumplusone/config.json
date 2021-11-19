@@ -1,0 +1,8 @@
+{
+    "version": "1.0",
+    "runtime": "python",
+    "name": "sumplusone",
+    "formula": "sumplusone.py",
+    "help": "sumplusone.md",
+    "dependencies": "requirements.txt"
+}

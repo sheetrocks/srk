@@ -123,9 +123,15 @@ func main() {
 	dir := path.Dir(filepath)
 
 	dat, err := ioutil.ReadFile(filepath)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	runtime := Runtime{}
 	err = json.Unmarshal(dat, &runtime)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	if runtime.Runtime == "" {
 		log.Fatal("Error: must specify runtime.")
@@ -179,6 +185,9 @@ func main() {
 		r := bytes.NewReader(body)
 
 		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("%s/formula", baseUrl), r)
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 		req.Header.Add("Content-Type", "application/json")

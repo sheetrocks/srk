@@ -1,8 +1,0 @@
-{
-    "version": "1.0",
-    "runtime": "python",
-    "name": "customsum",
-    "formula": "customsum.py",
-    "help": "customsum.md",
-    "dependencies": "requirements.txt"
-}
