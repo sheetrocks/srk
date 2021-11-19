@@ -1,0 +1,8 @@
+{
+    "version": "1.0",
+    "runtime": "python",
+    "name": "yourformulaname",
+    "formula": "yourformulaname.py",
+    "help": "yourformulaname.md",
+    "dependencies": "requirements.txt"
+}

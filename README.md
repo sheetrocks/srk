@@ -2,9 +2,8 @@
 
 ## How to make and push your own function to SheetRocks
 
-This tutorial will walk you through how to create a custom function and upload it to SheetRocks.
-Hopefully you have at least a basic understanding of programming, but I will try to make this
-as accessible as possible to any skill level.
+This tutorial will walk you through how to create a custom formula and upload it to SheetRocks.
+You should have at least a basic understanding of programming.
 
 ## Download the repository
 
@@ -23,11 +22,10 @@ where you chose to clone the repository or unzip the file.
 
 ## Creating a formula
 
-For the purposes of this tutorial, there are some completed examples in the ```examples/python``` folder. 
-To make a new formula, follow the conventions of the examples:
-- A config.json file is required. Please use that file to define your formula name and the file path to the required files.
+For the purposes of this tutorial, there is a completed example in the ```examples/python``` folder. 
+To make a new formula, follow the conventions of the example:
 - The python formula must be called `calculate`
-- The python function will be sent a list of arguments to you formula, cast as a spreadsheet castable type:
+- The python function will be sent a list of arguments, cast as a spreadsheet castable type:
     * None (for empty cells)
     * float
     * string
@@ -39,14 +37,25 @@ cells.
 
 ## Creating a help file
 
-Please follow the supplied convention for help files:
-- First line should be signature of the formula, e.g., SUM(arg1, arg2, ..argN). This will display in autocommplete.
-- Second line should be 1-sentence description of the formula. 
-- Next paragraph(s) can be long form explanation of the formula.
+Please follow the supplied convention for help files. For reference see the `help_format.md` file in this directory and the completed example `sumplusone.md` in `/examples/sumplusone`. 
+
+- All `#` shown are required for headers. `---` is used to separate sections and is also required.
+
+- The description for a formula must start with `Returns`.
+
+- Optional arguments are enclosed in brackets [] and should specify default value if not given.
+
+- In the `## Examples` section, you may include an `EXAMPLE_RANGE` that will format to appear as a spreadsheet snippet, with the top left most value appearing in cell `A1`. You can then reference these cells in your examples to show how the formula would be used in a sheet.
+
+- In the `## Related Formulas` section, urls should be formatted as `formulas/relatedformulaname`.
+
+## Creating a config file
+
+You must include with your formula and help document a `config.json` file. This file includes metadata about your formula and the paths to the required files. See `config_template.json` in this directory and the completed example `config.json` in `/examples/python/sumplusone`
 
 ## Push the function to Sheetrocks
 
-We recommend pushing the example located at `/examples/echo` to make sure you understand how to upload new formulas, before you try uploading your own code.
+We recommend pushing the example located at `/examples/sumplusone` to make sure you understand how to upload new formulas before you try uploading your own code.
 
 First, you'll need to log in and create an API key (open SheetRocks, log in, create a workbook, click profile, and click create API key).
 Copy the key to your clipboard.
