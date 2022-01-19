@@ -10,7 +10,7 @@ If you are familiar with git, clone this repository. If not, download the zip.
 
 To download the zip, click the green button labeled "Code" and click "Download Zip." Extract the downloaded zip file to a destination of your choice on your computer. In this tutorial the folder will be downloaded to the computer’s desktop.
 
-<img src="img/download.png" width=50% height=50%>
+<img src="img/download.png" width=25% height=25%>
 
 ## 2. Open the repository
 
