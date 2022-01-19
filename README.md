@@ -125,6 +125,10 @@ Hit `open` when asked if you want to open `srk.mac`.
 
 <img src="img/error4.png" width=25% height=25%>
 
+It’s possible that you might encounter some error messages as you are trying to follow the steps above. The errors should be descriptive enough to help you figure out what’s going on, but if you get stuck please contact support through the web-app and we can help you troubleshoot more!
+
+<img src="img/chat.png" width=40% height=40%>
+
 ---
 
 # More Information About Writing Custom Formulas
