@@ -19,13 +19,13 @@ Open the repository folder in your text editor of choice. If you do not have one
 
 Open the zipped folder to unzip it and then open the folder in VSCode. To do this, click `File > Open Folder` and select the entire folder that was unzipped.
 
-<img src="img/vscode.png" width=70% height=70%>
+<img src="img/vscode.png" width=80% height=80%>
 
 ## 3. Generate an API key
 
 First, you'll need to log in and create an API key (open SheetRocks, log in, create a workbook, hover on Profile, click API keys, and click Create API key). Copy the key to your clipboard.
 
-<img src="img/sheet.png" width=70% height=70%>
+<img src="img/sheet.png" width=80% height=80%>
 
 <img src="img/apikey.png" width=60% height=60%>
 
@@ -127,7 +127,7 @@ Hit `open` when asked if you want to open `srk.mac`.
 
 It’s possible that you might encounter some error messages as you are trying to follow the steps above. The errors should be descriptive enough to help you figure out what’s going on, but if you get stuck please contact support through the web-app and we can help you troubleshoot more!
 
-<img src="img/chat.png" width=60% height=60%>
+<img src="img/chat.png" width=80% height=80%>
 
 ---
 
