@@ -19,15 +19,15 @@ Open the repository folder in your text editor of choice. If you do not have one
 
 Open the zipped folder to unzip it and then open the folder in VSCode. To do this, click `File > Open Folder` and select the entire folder that was unzipped.
 
-![vscode](img/vscode.png)
+<img src="img/vscode.png" width=25% height=25%>
 
 ## 3. Generate an API key
 
 First, you'll need to log in and create an API key (open SheetRocks, log in, create a workbook, hover on Profile, click API keys, and click Create API key). Copy the key to your clipboard.
 
-![sheet](img/sheet.png)
+<img src="img/sheet.png" width=25% height=25%>
 
-![api key](img/apikey.png)
+<img src="img/apikey.png" width=25% height=25%>
 
 ## 4. Set your API key
 
@@ -105,15 +105,15 @@ Once your formula is loaded, you can immediately visit a SheetRocks sheet and us
 ## 7b. Troubleshooting
 On a Mac you might receive the following error message. 
 
-![error message](img/error1.png)
+<img src="img/error1.png" width=25% height=25%>
 
 To get around this, you will need to allow the download from the system preferences.
 ```
 Apple menu>System Preferences>Security & Privacy>General>Allow Anyway
 ```
 
-![system preferences](img/error2.png)
-![security and privacy](img/error3.png)
+<img src="img/error2.png" width=25% height=25%>
+<img src="img/error3.png" width=25% height=25%>
 
 
 Run the `push` command again.
@@ -123,7 +123,7 @@ Run the `push` command again.
 
 Hit `open` when asked if you want to open `srk.mac`.
 
-![allow](img/error4.png)
+<img src="img/error4.png" width=25% height=25%>
 
 ---
 
