@@ -29,7 +29,26 @@ First, you'll need to log in and create an API key (open SheetRocks, log in, cre
 
 <img src="img/apikey.png" width=60% height=60%>
 
-## 4. Set your API key
+## 4. Open the terminal
+
+Open the terminal in VSCode by hitting `ctrl+~` (`cmd+~` for mac). If you aren't using VSCode, open a terminal through your OS and navigate to the directory where you unzipped or cloned the repository by using the following command:
+
+On Mac:
+```
+cd /path/to/srk
+```
+
+On Windows:
+```
+cd C:\path\to\srk
+```
+
+On Linux:
+```
+cd /path/to/srk
+```
+
+## Set your API key
 
 On Mac:
 ```
@@ -51,24 +70,6 @@ On Linux:
 export SRK_TOKEN="your_api_key_here"
 ```
 
-## 5. Setup your terminal
-
-Navigate to the directory where you originally cloned the repository or unzipped the file you downloaded.
-
-On Mac:
-```
-cd /path/to/srk
-```
-
-On Windows:
-```
-cd C:\path\to\srk
-```
-
-On Linux:
-```
-cd /path/to/srk
-```
 
 ## 6. Push the function to SheetRocks
 
