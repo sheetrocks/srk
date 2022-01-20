@@ -48,7 +48,7 @@ On Linux:
 cd /path/to/srk
 ```
 
-## Set your API key
+## 5. Set your API key
 
 On Mac:
 ```
