@@ -1,14 +1,12 @@
 # srk - the SheetRocks Command Line Interface
 
-## How to make and push your own function to SheetRocks
-
 This tutorial will walk you through how to connect your dev environment to SheetRocks and how to push a pre-existing custom formula. This task is not for beginners—it will be helpful if you have at least a basic understanding of programming! At the end of this doc there is some bonus content about the nuances of writing your own custom formulas.
 
 ## 1. Download the repository
 
 If you are familiar with git, clone this repository. If not, download the zip.
 
-To download the zip, click the green button labeled "Code" and click "Download Zip." Extract the downloaded zip file to a destination of your choice on your computer. In this tutorial the folder will be downloaded to the computer’s desktop.
+To download the zip, click the green button labeled "Code" and click "Download Zip." Extract the downloaded zip file to a destination of your choice on your computer. **In this tutorial the folder will be downloaded to the computer’s desktop**.
 
 <img src="img/download.png" width=40% height=40%>
 
@@ -52,22 +50,22 @@ cd /path/to/srk
 
 On Mac:
 ```
-export SRK_TOKEN="your_api_key_here"
+export SRK_TOKEN=your_api_key_here
 ```
 
 On Windows (Command Prompt):
 ```
-setx SRK_TOKEN "your_api_key_here"
+setx SRK_TOKEN your_api_key_here
 ```
 
 On Windows (PowerShel):
 ```
-$env:SRK_TOKEN="your_api_key_here"
+$env:SRK_TOKEN=your_api_key_here
 ```
 
 On Linux:
 ```
-export SRK_TOKEN="your_api_key_here"
+export SRK_TOKEN=your_api_key_here
 ```
 
 
@@ -106,7 +104,7 @@ Once your formula is loaded, you can immediately visit a SheetRocks sheet and us
 ## 7b. Troubleshooting
 On a Mac you might receive the following error message. 
 
-<img src="img/error1.png" width=40% height=40%>
+<img src="img/error1.png" width=30% height=30%>
 
 To get around this, you will need to allow the download from the system preferences.
 ```
@@ -114,7 +112,7 @@ Apple menu>System Preferences>Security & Privacy>General>Allow Anyway
 ```
 
 <img src="img/error2.png" width=50% height=50%>
-<img src="img/error3.png" width=60% height=60%>
+<img src="img/error3.png" width=50% height=50%>
 
 
 Run the `push` command again.
@@ -124,7 +122,7 @@ Run the `push` command again.
 
 Hit `open` when asked if you want to open `srk.mac`.
 
-<img src="img/error4.png" width=40% height=40%>
+<img src="img/error4.png" width=30% height=30%>
 
 It’s possible that you might encounter some error messages as you are trying to follow the steps above. The errors should be descriptive enough to help you figure out what’s going on, but if you get stuck please contact support through the web-app and we can help you troubleshoot more!
 
