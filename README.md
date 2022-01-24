@@ -60,7 +60,7 @@ setx SRK_TOKEN your_api_key_here
 
 On Windows (PowerShel):
 ```
-$env:SRK_TOKEN=your_api_key_here
+$env:SRK_TOKEN="your_api_key_here"
 ```
 
 On Linux:
