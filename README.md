@@ -1,50 +1,23 @@
 # srk - the SheetRocks Command Line Interface
 
-This tutorial will walk you through how to connect your dev environment to SheetRocks and how to push a pre-existing custom formula. This task is not for beginners—it will be helpful if you have at least a basic understanding of programming! At the end of this doc there is some bonus content about the nuances of writing your own custom formulas.
+This tutorial will walk you through how to connect your dev environment to SheetRocks and how to push a pre-existing custom formula. It will help to have programming experience. At the end of this doc there is some bonus content about the nuances of writing your own custom formulas.
 
 ## 1. Download the repository
 
-If you are familiar with git, clone this repository. If not, download the zip.
+Download or clone the repository.
 
-To download the zip, click the green button labeled "Code" and click "Download Zip." Extract the downloaded zip file to a destination of your choice on your computer. **In this tutorial the folder will be downloaded to the computer’s desktop**.
+```
+git clone https://github.com/sheetrocks/srk.git
+```
 
-<img src="img/download.png" width=40% height=40%>
-
-## 2. Open the repository
-
-Open the repository folder in your text editor of choice. If you do not have one,
-[Visual Studio Code](https://code.visualstudio.com/) is widely used and recommended.
-
-Open the zipped folder to unzip it and then open the folder in VSCode. To do this, click `File > Open Folder` and select the entire folder that was unzipped.
-
-<img src="img/vscode.png" width=80% height=80%>
 
 ## 3. Generate an API key
 
-First, you'll need to log in and create an API key (open SheetRocks, log in, create a workbook, hover on Profile, click API keys, and click Create API key). Copy the key to your clipboard.
+First, you'll need to log in and either create an API key or use an existing one (open SheetRocks, log in, create a workbook, hover on Profile, click API keys, and click Create API key). Copy the key to your clipboard.
 
 <img src="img/sheet.png" width=70% height=70%>
 
 <img src="img/apikey.png" width=50% height=50%>
-
-## 4. Open the terminal
-
-Open the terminal in VSCode by hitting `ctrl+~` (`cmd+~` for mac). If you aren't using VSCode, open a terminal through your OS and navigate to the directory where you unzipped or cloned the repository by using the following command:
-
-On Mac:
-```
-cd /path/to/srk
-```
-
-On Windows:
-```
-cd C:\path\to\srk
-```
-
-On Linux:
-```
-cd /path/to/srk
-```
 
 ## 5. Set your API key
 
@@ -58,7 +31,7 @@ On Windows (Command Prompt):
 setx SRK_TOKEN your_api_key_here
 ```
 
-On Windows (PowerShel):
+On Windows (PowerShell):
 ```
 $env:SRK_TOKEN="your_api_key_here"
 ```
@@ -71,66 +44,76 @@ export SRK_TOKEN=your_api_key_here
 
 ## 6. Push the function to SheetRocks
 
-Push the example formula located at `/examples/python/sumplusone` to SheetRocks.
+Push the example formula located at `srk/examples/python/sumplusone` to SheetRocks.
 
 On Mac:
 ```
-./srk.mac push ./examples/python/sumplusone/config.json
+srk.mac push /path/to/srk/examples/python/sumplusone/config.json
 ```
 
 On Windows (Command Prompt):
 ```
-srk.exe push ./examples/python/sumplusone/config.json
+srk.exe push /path/to/srk/examples/python/sumplusone/config.json
 ```
 
 On Windows (PowerShell):
 ```
-./srk.exe push ./examples/python/sumplusone/config.json
+srk.exe push /path/to/srk/examples/python/sumplusone/config.json
 ```
 
 On Linux:
 ```
-./srk push /path/to/config.json
+srk push /path/to/srk/examples/python/sumplusone/config.json
 ```
 
-## 7a. Success
+## 7. Success
 
 If successful, you will see
 ```
 🎉 Success! You have pushed your formula "SUMPLUSONE" to SheetRocks 🎉
 ```
-Once your formula is loaded, you can immediately visit a SheetRocks sheet and use your new formula. 
+**Once your formula is loaded, you can immediately visit a SheetRocks sheet and use your new formula.** 
 
-## 7b. Troubleshooting
-On a Mac you might receive the following error message. 
+# 7b. Troubleshooting pushing a formula
 
-<img src="img/error1.png" width=30% height=30%>
+On a Mac you might receive the error message 
 
-To get around this, you will need to allow the download from the system preferences.
 ```
-Apple menu>System Preferences>Security & Privacy>General>Allow Anyway
+srk.mac cannot be opened because the developer cannot be verified
 ```
 
-<img src="img/error2.png" width=50% height=50%>
-<img src="img/error3.png" width=50% height=50%>
+To get around this, navigate to 
+
+```
+Apple menu > System Preferences > Security & Privacy > General
+```
+
+At the bottom of the window there should be a message that reads
+
+```
+srk.mac was blocked because it is not from an identified developer 
+```
+
+Hit `Allow Anyway` next to this message.
 
 
 Run the `push` command again.
 ```
-./srk.mac push ./examples/python/sumplusone/config.json
+srk.mac push /path/to/srk/examples/python/sumplusone/config.json
 ```
 
 Hit `open` when asked if you want to open `srk.mac`.
 
-<img src="img/error4.png" width=30% height=30%>
-
-It’s possible that you might encounter some error messages as you are trying to follow the steps above. The errors should be descriptive enough to help you figure out what’s going on, but if you get stuck please contact support through the web-app and we can help you troubleshoot more!
-
-<img src="img/chat.png" width=70% height=70%>
 
 ---
 
-# More Information About Writing Custom Formulas
+It’s possible that you might encounter some error messages as you are trying to follow the steps above. The errors should be descriptive enough to help you figure out what’s going on, but if you get stuck please contact support through the web-app and we can help you troubleshoot more!
+
+<img src="img/chat.png" width=60% height=60%>
+
+---
+
+# Writing Custom Formulas
 
 ## Creating a formula
 
