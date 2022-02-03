@@ -91,7 +91,7 @@ Open a sheet in SheetRocks and try out your new formula
 =SUMPLUSONE(enter_a_range_or_number)
 ```
 
-<br/><br/><br/><br/>
+<br/><br/>
 # Troubleshooting pushing a formula
 
 On a Mac you might receive the error message 
