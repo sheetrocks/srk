@@ -96,6 +96,10 @@ type WebConfig struct {
 }
 
 func main() {
+	if len(os.Args) < 3 {
+		log.Fatal("Error: not enough arguments.\nExpected command format: './srk push ./path/to/config.json'")
+	}
+
 	command := os.Args[1]
 	filepath := os.Args[2]
 	token := os.Getenv("SRK_TOKEN")
@@ -200,7 +204,7 @@ func main() {
 
 		s.Stop()
 		if resp.StatusCode == 200 {
-			fmt.Printf("🎉 Success! You have pushed your formula \"%s\" to SheetRocks 🎉\n", formulaBody.Name)
+			fmt.Printf("🎉 Success! You have pushed your formula \"%s\" to SheetRocks 🎉\nThe formula is available for immediate use in a SheetRocks sheet.\n", formulaBody.Name)
 		} else {
 			bytes, _ := ioutil.ReadAll(resp.Body)
 			fmt.Println("SheetRocks error: ", string(bytes))
