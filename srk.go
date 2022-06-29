@@ -204,7 +204,7 @@ func main() {
 
 		s.Stop()
 		if resp.StatusCode == 200 {
-			fmt.Printf("🎉 Success! You have pushed your formula \"%s\" to SheetRocks 🎉\nThe formula is available for immediate use in a SheetRocks sheet.\n", formulaBody.Name)
+			fmt.Printf("🎉 Success! You have pushed your formula \"%s\" to SheetRocks 🎉\nThe formula is available for immediate use in any SheetRocks workbook you've made. Please refresh your workbook to pick up the new formula.\n", formulaBody.Name)
 		} else {
 			bytes, _ := ioutil.ReadAll(resp.Body)
 			fmt.Println("SheetRocks error: ", string(bytes))
