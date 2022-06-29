@@ -142,7 +142,14 @@ func main() {
 	} else if !(runtime.Runtime == "python" || runtime.Runtime == "web") {
 		log.Fatal(`Error: invalid runtime. Accepted runtimes: "python", "web"`)
 	}
+	// } else if !(runtime.Runtime == "python" || runtime.Runtime == "javascript" || runtime.Runtime == "r" || runtime.Runtime == "web") {
+	// 	log.Fatal(`Error: invalid runtime. Accepted runtimes: "python", "javascript", "r", "web"`)
+	// }
 
+	// for now assuming no specified environment like formula/chart, even though may be added later
+	// same logic in this if block for all languages
+
+	// runtime.Runtime == "python" || runtime.Runtime == "javascript" || runtime.Runtime == "r"
 	if runtime.Runtime == "python" {
 		config := Config{}
 		err = json.Unmarshal(dat, &config)
